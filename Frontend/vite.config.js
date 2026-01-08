@@ -10,4 +10,13 @@ export default defineConfig({
       },
     }),
   ],
+   server: {
+    proxy: {
+      "/chat": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })
