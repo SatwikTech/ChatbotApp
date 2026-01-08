@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
@@ -10,13 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Ensure API key exists
 if (!process.env.OPENAI_API_KEY) {
   console.error("❌ Missing OPENAI_API_KEY in .env file");
   process.exit(1);
 }
 
-// Chat endpoint
 app.post("/chat", async (req, res) => {
   const { message } = req.body;
 
