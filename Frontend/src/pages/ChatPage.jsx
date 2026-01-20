@@ -30,7 +30,6 @@ function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState(initialQuestion ? [initialQuestion] : []);
 
-  // Fetch answer for initial question
   useEffect(() => {
     if (initialQuestion) {
       setLoading(true);
@@ -51,7 +50,7 @@ function ChatPage() {
         )
         .finally(() => setLoading(false));
     }
-  }, []); // 👈 empty dependency array prevents double calls
+  }, []);  
 
   const handleSend = async () => {
     if (!input.trim()) return; // guard against empty input

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, TextField, Button, Stack } from "@mui/material";
+import { Box, Typography, TextField, Button, Stack, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
@@ -16,24 +16,26 @@ function Home() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Welcome to Chatbot
-      </Typography>
-      <Stack direction="row" spacing={2}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Type your question..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-        />
-        <Button variant="contained" onClick={handleSend}>
-          Send
-        </Button>
-      </Stack>
-    </Box>
+    <Container>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          Welcome to Chatbot
+        </Typography>
+        <Stack direction="row" spacing={2}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Type your question..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <Button variant="contained" onClick={handleSend}>
+            Send
+          </Button>
+        </Stack>
+      </Box>
+    </Container>
   );
 }
 
