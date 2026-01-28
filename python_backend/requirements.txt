@@ -1,0 +1,6 @@
+flask
+flask_sqlalchemy
+python-dotenv
+huggingface-hub
+openai   # optional, if you use OpenAI-style client
+requests # if you still use raw HTTP calls

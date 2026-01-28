@@ -21,6 +21,8 @@ function ChatPage() {
   const navigate = useNavigate();
   const initialQuestion = location.state?.question || "";
 
+  const API_BASE = "http://localhost:3000"; // adjust if deployed or use proxy
+
   const [messages, setMessages] = useState(
     initialQuestion
       ? [{ from: "user", text: initialQuestion }]
@@ -30,49 +32,73 @@ function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState(initialQuestion ? [initialQuestion] : []);
 
+  // ✅ Load chat history on mount
+  useEffect(() => {
+    fetch(`${API_BASE}/chathistory?limit=20`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const formatted = data.data.map(chat => [
+            { from: "user", text: chat.question },
+            { from: "bot", text: chat.response }
+          ]).flat();
+          setMessages(formatted);
+        }
+      })
+      .catch(err => console.error("Failed to load history", err));
+  }, []);
+
+  // ✅ Handle initial question if passed from Home
   useEffect(() => {
     if (initialQuestion) {
       setLoading(true);
-      fetch("/chat", {
+      fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: initialQuestion }),
+        body: JSON.stringify({ username: "FrontendUser", message: initialQuestion }),
       })
-        .then((res) => res.json())
-        .then((data) =>
-          setMessages((prev) => [...prev, { from: "bot", text: data.reply }])
-        )
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setMessages(prev => [...prev, { from: "bot", text: data.data.response }]);
+          } else {
+            setMessages(prev => [...prev, { from: "bot", text: "Error: " + data.error }]);
+          }
+        })
         .catch(() =>
-          setMessages((prev) => [
-            ...prev,
-            { from: "bot", text: "Error: Unable to fetch response." },
-          ])
+          setMessages(prev => [...prev, { from: "bot", text: "Error: Unable to fetch response." }])
         )
         .finally(() => setLoading(false));
     }
-  }, []);  
+  }, []);
 
+  // ✅ Handle sending new message
   const handleSend = async () => {
-    if (!input.trim()) return; // guard against empty input
-    setMessages([...messages, { from: "user", text: input }]);
-    setHistory((prev) => [...prev, input]);
+    if (!input.trim()) return;
     const userMessage = input;
+    setMessages([...messages, { from: "user", text: userMessage }]);
+    setHistory(prev => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await fetch("/chat", {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ username: "FrontendUser", message: userMessage }),
       });
       const data = await res.json();
-      setMessages((prev) => [...prev, { from: "bot", text: data.reply }]);
+
+      if (data.success) {
+        setMessages(prev => [...prev, { from: "bot", text: data.data.response }]);
+      } else {
+        setMessages(prev => [...prev, { from: "bot", text: "Error: " + data.error }]);
+      }
     } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { from: "bot", text: "Error: Unable to fetch response." },
-      ]);
+      const text = await res.text(); // fallback if not JSON
+      data = { success: false, error: text };
+
+      setMessages(prev => [...prev, { from: "bot", text: "Error: Unable to fetch response." }]);
     } finally {
       setLoading(false);
     }
@@ -109,7 +135,6 @@ function ChatPage() {
         >
           <Stack spacing={2}>
             {messages.map((msg, index) => {
-              // collapse excessive blank lines
               const cleanText = msg.text.replace(/\n{3,}/g, "\n\n");
 
               return (
@@ -136,14 +161,14 @@ function ChatPage() {
                       maxWidth: "70%",
                       fontSize: "0.95rem",
                       lineHeight: 1.5,
-                      whiteSpace: "normal", // collapse spaces
+                      whiteSpace: "normal",
                     }}
                   >
                     {msg.from === "bot" ? (
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          table: ({node, ...props}) => (
+                          table: ({ node, ...props }) => (
                             <table
                               style={{
                                 borderCollapse: "collapse",
@@ -154,7 +179,7 @@ function ChatPage() {
                               {...props}
                             />
                           ),
-                          th: ({node, ...props}) => (
+                          th: ({ node, ...props }) => (
                             <th
                               style={{
                                 border: "1px solid #ccc",
@@ -165,7 +190,7 @@ function ChatPage() {
                               {...props}
                             />
                           ),
-                          td: ({node, ...props}) => (
+                          td: ({ node, ...props }) => (
                             <td
                               style={{
                                 border: "1px solid #ccc",

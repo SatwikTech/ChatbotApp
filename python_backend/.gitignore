@@ -1,4 +1,4 @@
-node_modules/
+# .gitignore
 .env
 chat.db
 __pycache__/
