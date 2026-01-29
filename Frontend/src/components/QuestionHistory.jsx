@@ -1,6 +1,6 @@
 // src/components/QuestionHistory.jsx
 import React from "react";
-import { Box, Typography, List, ListItem, ListItemText, Divider } from "@mui/material";
+import { Box, Typography, List, ListItem, ListItemText, Divider, ListItemButton } from "@mui/material";
 
 function QuestionHistory({ history }) {
   return (
@@ -9,13 +9,21 @@ function QuestionHistory({ history }) {
         Question History
       </Typography>
       <Divider sx={{ mb: 2 }} />
-      <List>
+      {/* <List>
         {history.map((q, index) => (
           <ListItem key={index} sx={{ py: 0.5 }}>
             <ListItemText primary={q} />
           </ListItem>
         ))}
+      </List> */}
+      <List>
+        {history.map((chat, index) => (
+          <ListItemButton key={chat.id || index} onClick={() => onSelect(chat)}>
+            <ListItemText primary={chat.question} />
+          </ListItemButton>
+        ))}
       </List>
+
     </Box>
   );
 }

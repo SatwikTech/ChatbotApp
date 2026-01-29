@@ -1,5 +1,5 @@
 // src/pages/ChatPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -22,6 +22,7 @@ function ChatPage() {
   const initialQuestion = location.state?.question || "";
 
   const API_BASE = "http://localhost:3000"; // adjust if deployed or use proxy
+  const messagesEndRef = useRef(null); // if required for auto-scroll will use later 
 
   const [messages, setMessages] = useState(
     initialQuestion
@@ -30,25 +31,32 @@ function ChatPage() {
   );
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState(initialQuestion ? [initialQuestion] : []);
+  const [history, setHistory] = useState([]);
 
-  // ✅ Load chat history on mount
+  //Load chat history on mount
   useEffect(() => {
     fetch(`${API_BASE}/chathistory?limit=20`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          const formatted = data.data.map(chat => [
-            { from: "user", text: chat.question },
-            { from: "bot", text: chat.response }
-          ]).flat();
-          setMessages(formatted);
+          const formattedHistory = data.data
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          // .map(chat => chat.question);
+
+          setHistory(formattedHistory);  // each item has {id, question, response, timestamp}
+          // const formatted = data.data.map(chat => [
+          //   { from: "user", text: chat.question },
+          //   { from: "bot", text: chat.response }
+          // ]).flat();
+
+
+          // setMessages(formatted);
         }
       })
       .catch(err => console.error("Failed to load history", err));
   }, []);
 
-  // ✅ Handle initial question if passed from Home
+  //Handle initial question if passed from Home
   useEffect(() => {
     if (initialQuestion) {
       setLoading(true);
@@ -71,13 +79,9 @@ function ChatPage() {
         .finally(() => setLoading(false));
     }
   }, []);
-
-  // ✅ Handle sending new message
   const handleSend = async () => {
     if (!input.trim()) return;
     const userMessage = input;
-    setMessages([...messages, { from: "user", text: userMessage }]);
-    setHistory(prev => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
@@ -90,15 +94,34 @@ function ChatPage() {
       const data = await res.json();
 
       if (data.success) {
-        setMessages(prev => [...prev, { from: "bot", text: data.data.response }]);
-      } else {
-        setMessages(prev => [...prev, { from: "bot", text: "Error: " + data.error }]);
-      }
-    } catch (err) {
-      const text = await res.text(); // fallback if not JSON
-      data = { success: false, error: text };
+        const newChat = {
+          id: data.data.id || Date.now(),
+          question: userMessage,
+          response: data.data.response,
+          timestamp: data.data.timestamp,
+          username: "FrontendUser"
+        };
 
-      setMessages(prev => [...prev, { from: "bot", text: "Error: Unable to fetch response." }]);
+        //Update sidebar history with the latest question
+        setHistory(prev => [newChat, ...prev]);
+
+        //If you want only the latest Q&A in the chat window:
+        setMessages([
+          { from: "user", text: userMessage },
+          { from: "bot", text: data.data.response }
+        ]);
+
+        //If you want a running conversation instead:
+        // setMessages(prev => [
+        //   ...prev,
+        //   { from: "user", text: userMessage },
+        //   { from: "bot", text: data.data.response }
+        // ]);
+      } else {
+        setMessages([{ from: "bot", text: "Error: " + data.error }]);
+      }
+    } catch {
+      setMessages([{ from: "bot", text: "Error: Unable to fetch response." }]);
     } finally {
       setLoading(false);
     }
@@ -107,7 +130,16 @@ function ChatPage() {
   return (
     <Box sx={{ display: "flex" }}>
       {/* Left Sidebar */}
-      <LeftNavbar history={history} />
+      <LeftNavbar
+        history={history}
+        onSelect={(chat) => {
+          setMessages([
+            { from: "user", text: chat.question },
+            { from: "bot", text: chat.response }
+          ]);
+        }}
+      />
+
 
       {/* Main Chat Area */}
       <Box sx={{ flex: 1, ml: "250px", p: 3, position: "relative" }}>

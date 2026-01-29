@@ -24,10 +24,10 @@ mongoose.connection.on("error", err => {
 });
 
 mongoose.connection.once("open", () => {
-  console.log("✅ Connected to MongoDB");
+  console.log(" Connected to MongoDB");
 });
 
-// ✅ Schema & Model
+//  Schema & Model
 const chatSchema = new mongoose.Schema({
   username: { type: String, default: "Anonymous" },
   question: { type: String, required: true },
@@ -37,7 +37,7 @@ const chatSchema = new mongoose.Schema({
 
 const Chat = mongoose.model("Chat", chatSchema);
 
-// ✅ Endpoint: Chat with OpenAI and Save
+//  Endpoint: Chat with OpenAI and Save
 app.post("/chat", async (req, res) => {
   const { username, message } = req.body;
 
@@ -49,7 +49,7 @@ app.post("/chat", async (req, res) => {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // ✅ corrected
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, //  corrected
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -108,8 +108,8 @@ app.get("/chathistory", async (req, res) => {
   }
 });
 
-// ✅ Start Server
+//  Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(` Server running on http://localhost:${PORT}`);
 });
