@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button, Stack, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import logo from '../assets/react.svg';
 import '../App.css';
 
 function Home() {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
-  let username = "User1"; 
+  let username = "User1";
 
   const handleSend = () => {
     if (input.trim() === "") return;
@@ -19,6 +20,7 @@ function Home() {
 
   return (
     <Container className="chatDiv">
+      <img src={logo} className="logo"/>
       <Box sx={{ p: 3 }} className="innerDiv">
         <Typography variant="h4" gutterBottom align="left">
           Hello {username}, Welcome to Chatbot

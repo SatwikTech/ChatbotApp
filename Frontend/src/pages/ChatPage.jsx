@@ -1,5 +1,5 @@
 // src/pages/ChatPage.jsx
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -41,16 +41,8 @@ function ChatPage() {
         if (data.success) {
           const formattedHistory = data.data
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-          // .map(chat => chat.question);
 
           setHistory(formattedHistory);  // each item has {id, question, response, timestamp}
-          // const formatted = data.data.map(chat => [
-          //   { from: "user", text: chat.question },
-          //   { from: "bot", text: chat.response }
-          // ]).flat();
-
-
-          // setMessages(formatted);
         }
       })
       .catch(err => console.error("Failed to load history", err));
@@ -68,7 +60,17 @@ function ChatPage() {
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            setMessages(prev => [...prev, { from: "bot", text: data.data.response }]);
+            const botresponse = data.data.response;
+            setMessages(prev => [...prev, { from: "bot", text: botresponse }]);
+
+            const newChat = {
+              id: data.data.id || Date.now(),
+              question: initialQuestion,
+              response: botresponse,
+              timestamp: data.data.timestamp,
+              username: "FrontendUser"
+            };
+            // setHistory(prev => [newChat, ...prev]);
           } else {
             setMessages(prev => [...prev, { from: "bot", text: "Error: " + data.error }]);
           }
@@ -78,7 +80,7 @@ function ChatPage() {
         )
         .finally(() => setLoading(false));
     }
-  }, []);
+  }, [initialQuestion]);
   const handleSend = async () => {
     if (!input.trim()) return;
     const userMessage = input;
@@ -103,7 +105,7 @@ function ChatPage() {
         };
 
         //Update sidebar history with the latest question
-        setHistory(prev => [newChat, ...prev]);
+        // setHistory(prev => [newChat, ...prev]);
 
         //If you want only the latest Q&A in the chat window:
         setMessages([
@@ -111,12 +113,6 @@ function ChatPage() {
           { from: "bot", text: data.data.response }
         ]);
 
-        //If you want a running conversation instead:
-        // setMessages(prev => [
-        //   ...prev,
-        //   { from: "user", text: userMessage },
-        //   { from: "bot", text: data.data.response }
-        // ]);
       } else {
         setMessages([{ from: "bot", text: "Error: " + data.error }]);
       }
@@ -139,20 +135,16 @@ function ChatPage() {
           ]);
         }}
       />
-
-
-      {/* Main Chat Area */}
-      <Box sx={{ flex: 1, ml: "250px", p: 3, position: "relative" }}>
-        {/* Close Icon */}
+      <Box sx={{ flex: 1, ml: "300px", p: 3, position: "relative" }}>
         <IconButton
           sx={{ position: "absolute", top: 8, right: 8 }}
           onClick={() => navigate("/")}
         >
-          X
+        X
         </IconButton>
 
         <Typography variant="h4" gutterBottom>
-          Chatbot UI
+          Answers
         </Typography>
 
         <Paper

@@ -3,11 +3,11 @@ import React from "react";
 import { Box } from "@mui/material";
 import QuestionHistory from "./QuestionHistory";
 
-function LeftNavbar({ history }) {
+function LeftNavbar({ history ,onSelect}) {
   return (
     <Box
       sx={{
-        width: 250,
+        width: 300,
         bgcolor: "grey.100",
         borderRight: "1px solid #ddd",
         height: "100vh",
@@ -16,7 +16,7 @@ function LeftNavbar({ history }) {
         top: 0,
       }}
     >
-      <QuestionHistory history={history} />
+      <QuestionHistory history={history} onSelect={onSelect}/>
     </Box>
   );
 }

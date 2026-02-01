@@ -2,7 +2,7 @@
 import React from "react";
 import { Box, Typography, List, ListItem, ListItemText, Divider, ListItemButton } from "@mui/material";
 
-function QuestionHistory({ history }) {
+function QuestionHistory({ history,onSelect }) {
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h6" gutterBottom>

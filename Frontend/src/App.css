@@ -1,7 +1,6 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -47,10 +46,11 @@
 .chatDiv {
   display: flex!important;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   height: 90vh;
+  flex-direction: column;
 }
 
 .chatDiv .innerDiv {
-  width: 95vw;
+  width: 100%;
 }
