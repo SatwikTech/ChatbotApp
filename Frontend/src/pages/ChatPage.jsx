@@ -32,6 +32,7 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
+  const [pendingResponse, setPendingResponse] = useState(null);
 
   //Load chat history on mount
   useEffect(() => {
@@ -48,39 +49,59 @@ function ChatPage() {
       .catch(err => console.error("Failed to load history", err));
   }, []);
 
-  //Handle initial question if passed from Home
   useEffect(() => {
-    if (initialQuestion) {
-      setLoading(true);
-      fetch(`${API_BASE}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: "FrontendUser", message: initialQuestion }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            const botresponse = data.data.response;
-            setMessages(prev => [...prev, { from: "bot", text: botresponse }]);
+    if (!initialQuestion) return;
 
-            const newChat = {
-              id: data.data.id || Date.now(),
-              question: initialQuestion,
-              response: botresponse,
-              timestamp: data.data.timestamp,
-              username: "FrontendUser"
-            };
-            // setHistory(prev => [newChat, ...prev]);
-          } else {
-            setMessages(prev => [...prev, { from: "bot", text: "Error: " + data.error }]);
-          }
-        })
-        .catch(() =>
-          setMessages(prev => [...prev, { from: "bot", text: "Error: Unable to fetch response." }])
-        )
-        .finally(() => setLoading(false));
-    }
+    setLoading(true);
+
+    fetch(`${API_BASE}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "FrontendUser", message: initialQuestion }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const botresponse = Array.isArray(data.data.response)
+            ? data.data.response.join("\n")
+            : data.data.response;
+
+          // update messages
+          setMessages([
+            { from: "user", text: initialQuestion },
+            { from: "bot", text: botresponse }
+          ]);
+
+          // build new chat entry
+          const newChat = {
+            id: data.data.id || Date.now(),
+            question: initialQuestion,
+            response: botresponse,
+            timestamp: data.data.timestamp,
+            username: "FrontendUser"
+          };
+
+          // update history with deduplication
+          setHistory(prev => {
+            const exists = prev.some(item => item.id === newChat.id);
+            return exists ? prev : [newChat, ...prev];
+          });
+        } else {
+          setMessages(prev => [
+            ...prev,
+            { from: "bot", text: "Error: " + data.error }
+          ]);
+        }
+      })
+      .catch(() =>
+        setMessages(prev => [
+          ...prev,
+          { from: "bot", text: "Error: Unable to fetch response." }
+        ])
+      )
+      .finally(() => setLoading(false));
   }, [initialQuestion]);
+
   const handleSend = async () => {
     if (!input.trim()) return;
     const userMessage = input;
@@ -96,6 +117,9 @@ function ChatPage() {
       const data = await res.json();
 
       if (data.success) {
+        const fullResponse = Array.isArray(data.data.response)
+          ? data.data.response.join("\n")
+          : data.data.response;
         const newChat = {
           id: data.data.id || Date.now(),
           question: userMessage,
@@ -105,7 +129,10 @@ function ChatPage() {
         };
 
         //Update sidebar history with the latest question
-        // setHistory(prev => [newChat, ...prev]);
+        setHistory(prev => {
+          const exists = prev.some(item => item.id === newChat.id);
+          return exists ? prev : [newChat, ...prev];
+        });
 
         //If you want only the latest Q&A in the chat window:
         setMessages([
@@ -140,7 +167,7 @@ function ChatPage() {
           sx={{ position: "absolute", top: 8, right: 8 }}
           onClick={() => navigate("/")}
         >
-        X
+          X
         </IconButton>
 
         <Typography variant="h4" gutterBottom>

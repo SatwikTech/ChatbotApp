@@ -17,4 +17,5 @@ def get_huggingface_response(message: str) -> str:
         messages=[{"role": "user", "content": message}],
         max_tokens=200,  # optional
     )
-    return completion.choices[0].message["content"]
+    answer = completion.choices[0].message.content
+    return answer

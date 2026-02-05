@@ -35,3 +35,11 @@ def get_chats(limit=20):
     rows = cursor.fetchall()
     conn.close()
     return rows[::-1]  # oldest → newest
+
+# NEW: Reset function
+def reset_chats():
+    conn = sqlite3.connect("chat.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM chathistory;")  # clears all rows
+    conn.commit()
+    conn.close()
