@@ -5,7 +5,7 @@ from services.huggingface_service import get_huggingface_response
 
 chat_bp = Blueprint("chat", __name__)
 
-@chat_bp.route("/chat", methods=["POST"])
+@chat_bp.route("/api/chat", methods=["POST"])
 def chat():
     data = request.json
     username = data.get("username", "Anonymous")

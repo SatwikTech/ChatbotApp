@@ -11,9 +11,11 @@ function LeftNavbar({ history ,onSelect}) {
         bgcolor: "grey.100",
         borderRight: "1px solid #ddd",
         height: "100vh",
-        position: "fixed",
+        position: "absolute",
         left: 0,
-        top: 0,
+        top: 81,
+        overflowY: "auto",
+        maxHeight: "calc(100vh - 81px)",
       }}
     >
       <QuestionHistory history={history} onSelect={onSelect}/>

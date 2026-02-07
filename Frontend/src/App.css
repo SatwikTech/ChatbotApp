@@ -5,7 +5,7 @@
 }
 
 .logo {
-  height: 6em;
+  height: 5em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
@@ -43,8 +43,17 @@
   color: #888;
 }
 
+.logOutButton {
+  background-color: #f44336 !important;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
 .chatDiv {
-  display: flex!important;
+  display: flex !important;
   justify-content: center;
   align-items: flex-start;
   height: 90vh;
@@ -53,4 +62,8 @@
 
 .chatDiv .innerDiv {
   width: 100%;
+}
+.header {
+  padding: 0 20px;
+  background-color: whitesmoke !important;
 }

@@ -3,7 +3,7 @@ from db import get_chats
 
 history_bp = Blueprint("history", __name__)
 
-@history_bp.route("/chathistory", methods=["GET"])
+@history_bp.route("/api/chathistory", methods=["GET"])
 def chathistory():
     try:
         limit = int(request.args.get("limit", 20))
